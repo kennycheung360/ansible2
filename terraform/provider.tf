@@ -1,6 +1,6 @@
 provider "google" {
   # credentials = file("sa2.json")
-  project     = "mb-internal-srv-tst"
+  project     = var.project_id
   region      = "europe-west4"
   zone        = "europe-west4-a"
 }
