@@ -12,6 +12,9 @@ sa.json
 # Generated config from imports
 generated.tf
 
-terraform/sa2.json
+# All service account JSON files
+*.json
+!package.json
+!package-lock.json
 
 
