@@ -1,0 +1,17 @@
+# Terraform state files
+terraform.tfstate
+terraform.tfstate.backup
+
+# Terraform directory
+.terraform/
+.terraform.lock.hcl
+
+# Service account credentials (sensitive)
+sa.json
+
+# Generated config from imports
+generated.tf
+
+terraform/sa2.json
+
+
