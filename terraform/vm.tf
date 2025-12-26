@@ -9,7 +9,6 @@ resource "google_compute_instance" "instance-20251215-184729" {
   description               = null
   desired_status            = null
   enable_display            = false
-  guest_accelerator         = []
   hostname                  = null
   labels = {
     goog-ops-agent-policy = "v2-x86-template-1-4-0"
