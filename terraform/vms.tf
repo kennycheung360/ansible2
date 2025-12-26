@@ -38,3 +38,4 @@ output "vm_internal_ips" {
     for name, vm in module.vm : name => vm.internal_ip
   }
 }
+
