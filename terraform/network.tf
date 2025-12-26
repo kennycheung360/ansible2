@@ -14,7 +14,6 @@ resource "google_compute_subnetwork" "default" {
   purpose                    = "PRIVATE"
   region                     = "europe-west4"
   role                       = null
-  secondary_ip_range         = []
   stack_type                 = "IPV4_ONLY"
   timeouts {
     create = null
@@ -36,7 +35,6 @@ resource "google_compute_subnetwork" "enum-euwe4" {
   purpose                    = "PRIVATE"
   region                     = "europe-west4"
   role                       = null
-  secondary_ip_range         = []
   stack_type                 = "IPV4_ONLY"
   timeouts {
     create = null
