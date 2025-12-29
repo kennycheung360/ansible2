@@ -2,15 +2,6 @@ name: Deploy VMs with Ansible & Destroy
 
 on:
   workflow_dispatch:
-    inputs:
-      action:
-        description: 'Action to perform'
-        required: true
-        default: 'deploy'
-        type: choice
-        options:
-          - deploy
-          - destroy
 
 env:
   PROJECT_ID: mb-internal-srv-tst
@@ -47,67 +38,55 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        if: github.event.inputs.action == 'deploy'
         working-directory: terraform
         run: terraform plan -var="project_id=${{ env.PROJECT_ID }}" -out=tfplan
 
-      - name: Terraform Apply
-        if: github.event.inputs.action == 'deploy'
-        working-directory: terraform
-        run: terraform apply -auto-approve tfplan
+#       - name: Terraform Apply
+#         working-directory: terraform
+#         run: terraform apply -auto-approve tfplan
 
-      - name: Terraform Destroy
-        if: github.event.inputs.action == 'destroy'
-        working-directory: terraform
-        run: terraform destroy -var="project_id=${{ env.PROJECT_ID }}" -auto-approve
+#   ansible:
+#     needs: terraform
+#     runs-on: ubuntu-latest
+#     environment: production
 
-    outputs:
-      vm_ips: ${{ steps.get_ips.outputs.ips }}
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v4
 
-  ansible:
-    needs: terraform
-    if: github.event.inputs.action == 'deploy'
-    runs-on: ubuntu-latest
-    environment: production
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.11'
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+#       - name: Install Ansible
+#         run: pip install ansible
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+#       - name: Authenticate to Google Cloud
+#         uses: google-github-actions/auth@v2
+#         with:
+#           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      - name: Install Ansible
-        run: pip install ansible
+#       - name: Set up gcloud SDK
+#         uses: google-github-actions/setup-gcloud@v2
+#         with:
+#           project_id: ${{ env.PROJECT_ID }}
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-
-      - name: Set up gcloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ env.PROJECT_ID }}
-
-      - name: Get VM IPs and create inventory
-        run: |
-          gcloud compute instances list \
-            --filter="name~'^vm-europe-west4'" \
-            --format="value(networkInterfaces[0].accessConfigs[0].natIP)" \
-            --project=${{ env.PROJECT_ID }} > /tmp/vm_ips.txt
+#       - name: Get VM IPs and create inventory
+#         run: |
+#           gcloud compute instances list \
+#             --filter="name~'^vm-europe-west4'" \
+#             --format="value(networkInterfaces[0].accessConfigs[0].natIP)" \
+#             --project=${{ env.PROJECT_ID }} > /tmp/vm_ips.txt
           
-          echo "[vms]" > inventory.ini
-          while read ip; do
-            echo "$ip ansible_user=sa_ansible ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
-          done < /tmp/vm_ips.txt
+#           echo "[vms]" > inventory.ini
+#           while read ip; do
+#             echo "$ip ansible_user=sa_ansible ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
+#           done < /tmp/vm_ips.txt
           
-          cat inventory.ini
+#           cat inventory.ini
 
-      - name: Run Ansible playbook
-        run: |
-          echo "Inventory created. Add your Ansible playbook and uncomment the line below."
-          # ansible-playbook -i inventory.ini playbook.yml
-
+#       - name: Run Ansible playbook
+#         run: |
+#           echo "Inventory created. Add your Ansible playbook and uncomment the line below."
+#           # ansible-playbook -i inventory.ini playbook.yml
