@@ -41,52 +41,52 @@ jobs:
         working-directory: terraform
         run: terraform plan -var="project_id=${{ env.PROJECT_ID }}" -out=tfplan
 
-#       - name: Terraform Apply
-#         working-directory: terraform
-#         run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve tfplan
 
-#   ansible:
-#     needs: terraform
-#     runs-on: ubuntu-latest
-#     environment: production
+  ansible:
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: production
 
-#     steps:
-#       - name: Checkout repo
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-#       - name: Set up Python
-#         uses: actions/setup-python@v5
-#         with:
-#           python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-#       - name: Install Ansible
-#         run: pip install ansible
+      - name: Install Ansible
+        run: pip install ansible
 
-#       - name: Authenticate to Google Cloud
-#         uses: google-github-actions/auth@v2
-#         with:
-#           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-#       - name: Set up gcloud SDK
-#         uses: google-github-actions/setup-gcloud@v2
-#         with:
-#           project_id: ${{ env.PROJECT_ID }}
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
 
-#       - name: Get VM IPs and create inventory
-#         run: |
-#           gcloud compute instances list \
-#             --filter="name~'^vm-europe-west4'" \
-#             --format="value(networkInterfaces[0].accessConfigs[0].natIP)" \
-#             --project=${{ env.PROJECT_ID }} > /tmp/vm_ips.txt
+      - name: Get VM IPs and create inventory
+        run: |
+          gcloud compute instances list \
+            --filter="name~'^vm-europe-west4'" \
+            --format="value(networkInterfaces[0].accessConfigs[0].natIP)" \
+            --project=${{ env.PROJECT_ID }} > /tmp/vm_ips.txt
           
-#           echo "[vms]" > inventory.ini
-#           while read ip; do
-#             echo "$ip ansible_user=sa_ansible ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
-#           done < /tmp/vm_ips.txt
+          echo "[vms]" > inventory.ini
+          while read ip; do
+            echo "$ip ansible_user=sa_ansible ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
+          done < /tmp/vm_ips.txt
           
-#           cat inventory.ini
+          cat inventory.ini
 
-#       - name: Run Ansible playbook
-#         run: |
-#           echo "Inventory created. Add your Ansible playbook and uncomment the line below."
-#           # ansible-playbook -i inventory.ini playbook.yml
+      - name: Run Ansible playbook
+        run: |
+          echo "Inventory created. Add your Ansible playbook and uncomment the line below."
+          # ansible-playbook -i inventory.ini playbook.yml
