@@ -1,8 +1,8 @@
 locals {
   vms = {
     "vm-europe-west4-a" = "europe-west4-a"
-    "vm-europe-west4-b" = "europe-west4-b"
-    "vm-europe-west4-c" = "europe-west4-c"
+    # "vm-europe-west4-b" = "europe-west4-b"
+    # "vm-europe-west4-c" = "europe-west4-c"
   }
 }
 
