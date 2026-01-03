@@ -1,0 +1,69 @@
+name: Ansible Upload File to VM
+
+on:
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: mb-internal-srv-tst
+  VM_NAME: vm-europe-west4-a
+  VM_ZONE: europe-west4-a
+
+permissions:
+  contents: read
+
+jobs:
+  ansible:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Get VM external IP
+        id: get_ip
+        run: |
+          VM_IP=$(gcloud compute instances describe ${{ env.VM_NAME }} \
+            --zone=${{ env.VM_ZONE }} \
+            --project=${{ env.PROJECT_ID }} \
+            --format="value(networkInterfaces[0].accessConfigs[0].natIP)")
+          echo "vm_ip=$VM_IP" >> $GITHUB_OUTPUT
+          echo "VM IP: $VM_IP"
+
+      - name: Create Ansible inventory
+        run: |
+          cat > ansible/inventory.ini << EOF
+          [vms]
+          ${{ steps.get_ip.outputs.vm_ip }} ansible_user=sa_ansible ansible_ssh_private_key_file=~/.ssh/id_rsa
+          EOF
+          cat ansible/inventory.ini
+
+      - name: Run Ansible playbook
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory.ini playbook.yml -v
+

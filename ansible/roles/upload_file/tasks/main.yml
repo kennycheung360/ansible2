@@ -1,0 +1,19 @@
+---
+- name: Upload test file to /tmp/test.txt
+  ansible.builtin.copy:
+    content: |
+      Hello from Ansible!
+      This file was uploaded by the upload_file role.
+      Timestamp: {{ ansible_date_time.iso8601 }}
+    dest: /tmp/test.txt
+    mode: '0644'
+
+- name: Verify file was created
+  ansible.builtin.stat:
+    path: /tmp/test.txt
+  register: file_stat
+
+- name: Display file info
+  ansible.builtin.debug:
+    msg: "File created successfully: {{ file_stat.stat.path }}, size: {{ file_stat.stat.size }} bytes"
+

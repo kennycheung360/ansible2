@@ -1,0 +1,8 @@
+---
+- name: Upload file to VM
+  hosts: all
+  become: false
+
+  roles:
+    - upload_file
+
